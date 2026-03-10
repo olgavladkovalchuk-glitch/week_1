@@ -1,0 +1,900 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Основы HTML — Интерактивный курс</title>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#050d12;--fg:#f0f7fb;--card:#0f1c25;--muted:#1a2d3a;--muted-fg:#7a9bb0;
+  --primary:#2dd4e4;--primary-fg:#050d12;--secondary:#c45cdb;--secondary-fg:#050d12;
+  --border:#1e3548;--code-bg:#020810;--panel:#0f1c25;--panel-hover:#162a38;
+  --pink:306,76%,60%;--blue:189,86%,56%;
+}
+body{background:var(--bg);color:var(--fg);font-family:'Inter',sans-serif;line-height:1.6}
+::-webkit-scrollbar{width:6px}::-webkit-scrollbar-track{background:var(--bg)}::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+.mono{font-family:'JetBrains Mono',monospace;font-variant-ligatures:none}
+[class*="JetBrains"],[style*="JetBrains"],.codeblock,.inline-code,.fill-area,.fill-input,.sandbox-editor,.tag,.exercise-type,.exercise-num,.btn,.match-label,.sandbox-label,.theory-label{font-variant-ligatures:none;-webkit-font-feature-settings:"liga" 0,"calt" 0;font-feature-settings:"liga" 0,"calt" 0}
+a{color:var(--primary)}
+
+.container{max-width:740px;margin:0 auto;padding:48px 20px 80px}
+.space-y>*+*{margin-top:28px}
+
+/* Tags & badges */
+.tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:2px;padding:4px 10px;border-radius:4px}
+.tag-blue{color:var(--primary);background:hsla(var(--blue),.15);border:1px solid hsla(var(--blue),.3)}
+.tag-pink{color:var(--secondary);background:hsla(var(--pink),.15);border:1px solid hsla(var(--pink),.3)}
+
+h1{font-size:clamp(28px,5vw,44px);font-weight:700;line-height:1.15;margin:12px 0}
+h2{font-size:clamp(24px,4vw,34px);font-weight:700;line-height:1.2}
+h3{font-size:18px;font-weight:600;margin-bottom:14px}
+h4{font-size:17px;font-weight:600;margin-bottom:8px}
+
+/* Theory block */
+.theory{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:28px;margin-bottom:0}
+.theory-label{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted-fg);margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.theory-label svg{flex-shrink:0;color:var(--secondary)}
+.theory-content{font-size:15px;line-height:1.6}
+.theory-content>*+*{margin-top:14px}
+.theory-content strong{color:var(--secondary);font-weight:600}
+.theory-content ul,.theory-content ol{padding-left:20px}
+.theory-content li{margin-bottom:6px;font-size:15px}
+.theory-content ul{list-style:disc}
+.theory-content ol{list-style:decimal}
+
+/* Code blocks */
+.codeblock{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:13px;line-height:1.6;overflow-x:auto;white-space:pre;margin:14px 0;max-width:100%}
+.inline-code{font-family:'JetBrains Mono',monospace;font-size:13px;background:var(--code-bg);padding:2px 6px;border-radius:4px;border:1px solid var(--border);color:var(--primary)}
+
+/* Exercise card */
+.exercise{border:1px solid var(--border);border-radius:8px;padding:28px;position:relative;overflow:hidden;transition:border-color .3s}
+.exercise-bar{position:absolute;top:0;left:0;right:0;height:2px;background:var(--border);transition:background .3s}
+.exercise.correct{border-color:hsla(var(--blue),.3);box-shadow:0 0 20px hsla(var(--blue),.15)}
+.exercise.correct .exercise-bar{background:var(--primary)}
+.exercise.wrong{border-color:hsla(var(--pink),.3)}
+.exercise.wrong .exercise-bar{background:var(--secondary)}
+.exercise-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.exercise-type{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--primary);display:flex;align-items:center;gap:6px}
+.exercise-num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted-fg)}
+.exercise-desc{font-size:14px;color:var(--muted-fg);margin-bottom:20px;line-height:1.6}
+
+/* Choice options */
+.choice-option{display:flex;align-items:flex-start;gap:12px;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:14px 16px;font-size:14px;text-align:left;cursor:pointer;transition:all .2s;width:100%;color:var(--fg)}
+.choice-option:hover:not(:disabled){border-color:var(--primary);background:var(--panel-hover)}
+.choice-option:disabled{cursor:default}
+.choice-option.selected-correct{border-color:var(--primary);background:hsla(var(--blue),.15)}
+.choice-option.selected-wrong{border-color:var(--secondary);background:hsla(var(--pink),.15)}
+.choice-option.dimmed{opacity:.5;cursor:default}
+.choice-check{flex-shrink:0;width:18px;height:18px;border:1px solid var(--muted-fg);border-radius:4px;margin-top:2px;display:flex;align-items:center;justify-content:center;font-size:11px;line-height:1}
+
+/* Match rows */
+.match-row{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--border);border-radius:6px;padding:10px 16px;flex-wrap:wrap}
+.match-label{font-family:'JetBrains Mono',monospace;font-size:13px;color:hsl(var(--pink));min-width:120px;flex-shrink:0}
+.match-select{flex:1;min-width:160px;background:var(--bg);border:1px solid var(--border);border-radius:4px;padding:8px 10px;font-family:'Inter',sans-serif;font-size:14px;color:var(--fg);outline:none;cursor:pointer}
+.match-select:focus{border-color:var(--primary)}
+.match-select.sel-correct{border-color:var(--primary);color:var(--primary);background:hsla(var(--blue),.15)}
+.match-select.sel-wrong{border-color:var(--secondary);color:var(--secondary);background:hsla(var(--pink),.15)}
+
+/* Fill blank */
+.fill-area{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:16px;font-family:'JetBrains Mono',monospace;font-size:14px;display:flex;flex-wrap:wrap;align-items:center;gap:6px;line-height:2;margin-bottom:16px}
+.fill-area .syntax{color:hsl(var(--pink))}
+.fill-input{background:var(--panel);border:1px solid var(--border);border-radius:4px;padding:4px 8px;font-family:'JetBrains Mono',monospace;font-size:13px;text-align:center;color:var(--fg);outline:none;transition:border-color .2s}
+.fill-input:focus{border-color:var(--primary)}
+.fill-input.inp-correct{border-color:var(--primary);color:var(--primary);background:hsla(var(--blue),.15)}
+.fill-input.inp-wrong{border-color:var(--secondary);color:var(--secondary);background:hsla(var(--pink),.15)}
+
+/* Sandbox */
+.sandbox-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px}
+@media(max-width:600px){.sandbox-grid{grid-template-columns:1fr}}
+.sandbox-label{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted-fg);margin-bottom:8px}
+.sandbox-editor{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:14px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;resize:vertical;min-height:180px;width:100%;color:var(--fg);outline:none}
+.sandbox-editor:focus{border-color:var(--primary)}
+.sandbox-preview{background:var(--fg);border:3px solid var(--border);border-radius:6px;min-height:180px;overflow:hidden;display:flex}
+.sandbox-preview iframe{width:100%;min-height:180px;border:0}
+.sandbox-placeholder{margin:auto;text-align:center;color:var(--muted-fg);font-size:13px;padding:16px;line-height:1.6}
+
+/* Buttons */
+.btn{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;text-transform:uppercase;padding:10px 16px;border-radius:6px;border:none;cursor:pointer;transition:opacity .2s;display:inline-flex;align-items:center;gap:6px}
+.btn:hover{opacity:.9}
+.btn:disabled{opacity:.4;cursor:not-allowed}
+.btn-primary{background:var(--primary);color:var(--primary-fg)}
+.btn-dark{background:var(--fg);color:var(--bg)}
+.btn-outline{background:transparent;border:1px solid var(--border);color:var(--fg)}
+.btn-outline:hover{background:var(--panel)}
+.btn-full{width:100%;justify-content:center;margin-top:16px}
+.btn-group{display:flex;gap:10px;flex-wrap:wrap}
+
+/* Feedback */
+.feedback{margin-top:16px;padding:14px;border-radius:6px;font-size:14px;display:flex;align-items:flex-start;gap:10px;animation:fadeIn .35s ease}
+.feedback-ok{background:hsla(var(--blue),.15);border:1px solid hsla(var(--blue),.3);color:var(--primary)}
+.feedback-err{background:hsla(var(--pink),.15);border:1px solid hsla(var(--pink),.3);color:var(--secondary)}
+
+/* Level map */
+.level-btn{display:flex;align-items:center;gap:16px;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:18px 20px;text-align:left;transition:all .2s;position:relative;overflow:hidden;cursor:pointer;width:100%;color:var(--fg)}
+.level-btn:hover{border-color:var(--primary);transform:translateY(-1px)}
+.level-btn.status-active{border-color:hsla(var(--pink),.3)}
+.level-btn.status-completed{border-color:hsla(var(--blue),.3)}
+.level-btn .accent-bar{position:absolute;left:0;top:0;bottom:0;width:3px}
+.level-btn.status-active .accent-bar{background:var(--secondary)}
+.level-btn.status-completed .accent-bar{background:var(--primary)}
+.level-num{font-family:'JetBrains Mono',monospace;font-size:18px;font-weight:800;width:36px;flex-shrink:0;color:var(--primary)}
+.level-btn.status-active .level-num{color:var(--secondary)}
+.level-info{flex:1;min-width:0}
+.level-title{display:block;font-size:15px;font-weight:600;margin-bottom:2px}
+.level-desc{display:block;font-size:13px;color:var(--muted-fg)}
+.level-badge{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;padding:6px 12px;border-radius:4px;flex-shrink:0;text-transform:uppercase;display:flex;align-items:center;gap:4px}
+.level-badge.badge-active{background:var(--secondary);color:var(--secondary-fg)}
+.level-badge.badge-completed{color:var(--primary);border:1px solid hsla(var(--blue),.3);background:transparent}
+
+.map-header{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted-fg);margin-bottom:16px;display:flex;align-items:center;gap:10px}
+.map-header::after{content:'';flex:1;height:1px;background:var(--border)}
+
+.back-btn{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted-fg);background:none;border:none;cursor:pointer;text-transform:uppercase;letter-spacing:1.5px;margin-bottom:24px;padding:0}
+.back-btn:hover{color:var(--fg)}
+
+.reset-btn{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted-fg);background:none;border:none;cursor:pointer;margin-top:24px;padding:0}
+.reset-btn:hover{color:var(--secondary)}
+
+/* Demo blocks in theory */
+.demo-block{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:16px;margin:12px 0;font-family:'JetBrains Mono',monospace;font-size:14px}
+.demo-block .demo-div{background:hsla(var(--pink),.15);border:1px solid hsla(var(--pink),.3);border-radius:4px;padding:8px 12px;margin-bottom:8px}
+.demo-block .demo-div:last-child{background:hsla(var(--blue),.15);border-color:hsla(var(--blue),.3);margin-bottom:0}
+.demo-span-example{color:var(--secondary);font-weight:700}
+.summary-box{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:16px;margin:12px 0;font-size:14px}
+.summary-box>*+*{margin-top:8px}
+.text-pink{color:var(--secondary)}
+.text-blue{color:var(--primary)}
+
+/* Anatomy cheatsheet */
+.anatomy-btn{display:flex;align-items:center;gap:16px;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:18px 20px;text-align:left;transition:all .2s;cursor:pointer;width:100%;color:var(--fg);margin-bottom:20px}
+.anatomy-btn:hover{border-color:var(--primary);transform:translateY(-1px)}
+.anatomy-btn-icon{color:var(--primary);flex-shrink:0;font-size:20px}
+.anatomy-btn-info{flex:1;min-width:0}
+.anatomy-btn-title{display:block;font-size:15px;font-weight:600}
+.anatomy-btn-desc{display:block;font-size:13px;color:var(--muted-fg)}
+.anatomy-btn-arrow{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted-fg);text-transform:uppercase;letter-spacing:1.5px;flex-shrink:0}
+.anatomy-header{font-size:15px;color:var(--muted-fg);margin-bottom:24px;line-height:1.6}
+.hidden-layers{margin-bottom:16px}
+.hidden-layers-title{font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted-fg);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.hidden-tag{font-family:'JetBrains Mono',monospace;font-size:12px;padding:6px 12px;border-radius:6px;border:1px solid var(--border);background:var(--panel);color:var(--muted-fg);cursor:pointer;transition:all .2s}
+.hidden-tag:hover,.hidden-tag.active{border-color:var(--primary);color:var(--primary);background:var(--muted)}
+.page-mock{background:var(--fg);border-radius:8px;overflow:hidden;max-width:100%;box-shadow:0 8px 32px rgba(0,0,0,.4);border:1px solid var(--border)}
+.page-mock-bar{background:#e2e8f0;padding:8px 12px;display:flex;align-items:center;gap:8px}
+.page-mock-dots{display:flex;gap:5px}
+.page-mock-dot{width:10px;height:10px;border-radius:50%}
+.page-mock-dot:nth-child(1){background:#ff5f57}
+.page-mock-dot:nth-child(2){background:#ffbd2e}
+.page-mock-dot:nth-child(3){background:#28c840}
+.page-mock-url{flex:1;background:#fff;border-radius:4px;padding:3px 8px;font-size:11px;color:#64748b;font-family:'JetBrains Mono',monospace;font-variant-ligatures:none;-webkit-font-feature-settings:"liga" 0,"calt" 0;font-feature-settings:"liga" 0,"calt" 0}
+.page-zone{position:relative;padding:14px 16px;border-bottom:1px dashed #e2e8f0;cursor:pointer;transition:all .15s}
+.page-zone:last-child{border-bottom:none}
+.page-zone:hover{filter:brightness(.97)}
+.page-zone.active{box-shadow:inset 0 0 0 2px var(--zone-color)}
+.page-zone-label{position:absolute;right:8px;top:6px;font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;padding:2px 7px;border-radius:3px;color:#fff;transition:transform .15s;font-variant-ligatures:none;-webkit-font-feature-settings:"liga" 0,"calt" 0;font-feature-settings:"liga" 0,"calt" 0}
+.page-zone.active .page-zone-label{transform:scale(1.1)}
+.zone-header{background:#dbeafe;--zone-color:#3b82f6}.zone-header .page-zone-label{background:#3b82f6}
+.zone-nav{background:#eff6ff;--zone-color:#60a5fa}.zone-nav .page-zone-label{background:#60a5fa}
+.zone-main{background:#fff;padding:18px 16px;--zone-color:#a855f7}.zone-main .page-zone-label{background:#a855f7}
+.zone-footer{background:#f1f5f9;--zone-color:#64748b}.zone-footer .page-zone-label{background:#64748b}
+.zone-h1{font-size:18px;font-weight:700;color:#1e293b;margin:0}
+.zone-nav-links{display:flex;gap:12px;font-size:12px;color:#3b82f6}
+.zone-p{font-size:13px;color:#475569;margin:6px 0 0;line-height:1.5}
+.zone-img-placeholder{background:#e2e8f0;border-radius:6px;height:48px;display:flex;align-items:center;justify-content:center;font-size:11px;color:#94a3b8;margin-top:8px;border:2px dashed #cbd5e1;cursor:pointer;transition:all .15s}
+.zone-img-placeholder:hover{border-color:#94a3b8}
+.zone-img-placeholder.active{border-color:#a855f7;background:#f3e8ff}
+.zone-footer-text{font-size:11px;color:#94a3b8}
+.inner-tag{font-family:'JetBrains Mono',monospace;font-size:9px;font-weight:700;color:#a855f7;padding:1px 4px;border-radius:3px;cursor:pointer;transition:all .15s;margin-left:4px;font-variant-ligatures:none;-webkit-font-feature-settings:"liga" 0,"calt" 0;font-feature-settings:"liga" 0,"calt" 0}
+.inner-tag:hover,.inner-tag.active{background:#a855f7;color:#fff}
+.info-card{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:20px;margin-top:16px;border-left:3px solid var(--card-accent);animation:fadeIn .25s ease}
+.info-card-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.info-card-tag{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:600;font-variant-ligatures:none;-webkit-font-feature-settings:"liga" 0,"calt" 0;font-feature-settings:"liga" 0,"calt" 0}
+.info-card-label{font-size:13px;color:var(--muted-fg);margin-left:8px}
+.info-card-close{background:none;border:none;color:var(--muted-fg);cursor:pointer;font-size:16px;padding:2px}
+.info-card-close:hover{color:var(--fg)}
+.info-card-desc{font-size:14px;line-height:1.6;margin-bottom:12px}
+.info-card-code{background:var(--code-bg);border:1px solid var(--border);border-radius:6px;padding:10px 12px;font-family:'JetBrains Mono',monospace;font-size:12px;line-height:1.6;overflow-x:auto;white-space:pre;font-variant-ligatures:none;-webkit-font-feature-settings:"liga" 0,"calt" 0;font-feature-settings:"liga" 0,"calt" 0}
+.info-hint{text-align:center;padding:12px 0;font-size:13px;color:var(--muted-fg);font-style:italic;margin-top:16px}
+.show-code-btn{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted-fg);background:none;border:none;cursor:pointer;margin-top:20px;padding:0}
+.show-code-btn:hover{color:var(--primary)}
+
+.header-divider{padding-bottom:32px;border-bottom:1px solid var(--border);margin-bottom:36px}
+
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.animate-in{animation:fadeIn .35s ease}
+
+/* Description lists in exercises */
+.exercise-desc ul{list-style:disc;padding-left:20px;margin-top:8px}
+.exercise-desc li{margin-bottom:4px}
+</style>
+</head>
+<body>
+
+<div class="container" id="app"></div>
+
+<script>
+// ── State ──
+const STORAGE_KEY = 'html-course-progress';
+const LEVELS = [
+  {num:'01',title:'Синтаксис и разметка',desc:'Теги, атрибуты, каркас документа, комментарии'},
+  {num:'02',title:'Текст и структура',desc:'Заголовки, абзацы, переносы строк и списки'},
+  {num:'03',title:'Семантика',desc:'header, main, footer, nav, section'},
+  {num:'04',title:'div, span, class, id',desc:'Контейнеры и метки — основа вёрстки'},
+  {num:'05',title:'Ссылки и изображения',desc:'Теги a и img, атрибуты href, src, alt, target'},
+];
+
+let completed = [];
+try { completed = JSON.parse(localStorage.getItem(STORAGE_KEY)) || []; } catch(e){}
+let currentLevel = null;
+
+const $ = s => document.querySelector(s);
+const app = () => $('#app');
+
+function save() { localStorage.setItem(STORAGE_KEY, JSON.stringify(completed)); }
+
+function esc(s) { return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
+
+// ── SVG icons ──
+const icons = {
+  check: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`,
+  x: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>`,
+  arrow: `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>`,
+  arrowR: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>`,
+  book: `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>`,
+  lock: `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`,
+};
+
+// ── Render helpers ──
+function theory(title, content) {
+  return `<div class="theory"><div class="theory-label">${icons.book} Теория</div><h3>${title}</h3><div class="theory-content">${content}</div></div>`;
+}
+function code(text) { return `<pre class="codeblock">${esc(text)}</pre>`; }
+function ic(text) { return `<span class="inline-code">${esc(text)}</span>`; }
+
+// ── Exercise components ──
+let exId = 0;
+function choiceExercise(num, total, title, desc, options) {
+  const id = 'ex'+(exId++);
+  return `<div class="exercise" id="${id}"><div class="exercise-bar"></div>
+    <div class="exercise-header"><span class="exercise-type">${icons.check} Выбор</span><span class="exercise-num">${num} / ${total}</span></div>
+    <h4>${title}</h4>${desc?`<div class="exercise-desc">${desc}</div>`:''}
+    <div class="space-y" style="--space:10px" data-choice="${id}">${options.map((o,i)=>`
+      <button class="choice-option" onclick="checkChoice('${id}',${i},${!!o.correct})" data-idx="${i}">
+        <span class="choice-check" data-check="${i}"></span><span>${esc(o.text)}</span>
+      </button>`).join('')}</div>
+    <div id="${id}-fb"></div></div>`;
+}
+
+function matchExercise(num, total, title, desc, rows) {
+  const id = 'ex'+(exId++);
+  const rowsJson = esc(JSON.stringify(rows.map(r=>r.correctValue)));
+  return `<div class="exercise" id="${id}"><div class="exercise-bar"></div>
+    <div class="exercise-header"><span class="exercise-type">${icons.check} Классификация</span><span class="exercise-num">${num} / ${total}</span></div>
+    <h4>${title}</h4>${desc?`<div class="exercise-desc">${desc}</div>`:''}
+    <div class="space-y" style="--space:10px">${rows.map((r,i)=>`
+      <div class="match-row"><span class="match-label">${esc(r.label)}</span>
+      <select class="match-select" data-match="${id}" data-idx="${i}"><option value="">Выбери вариант...</option>${r.options.map(o=>`<option value="${esc(o)}">${esc(o)}</option>`).join('')}</select></div>`).join('')}</div>
+    <div style="margin-top:16px"><button class="btn btn-dark" onclick="checkMatch('${id}',${rowsJson})">✓ Проверить</button></div>
+    <div id="${id}-fb"></div></div>`;
+}
+
+function fillExercise(num, total, title, desc, blanks) {
+  const id = 'ex'+(exId++);
+  const answersJson = esc(JSON.stringify(blanks.map(b=>b.answer)));
+  return `<div class="exercise" id="${id}"><div class="exercise-bar"></div>
+    <div class="exercise-header"><span class="exercise-type">${icons.check} Ввод кода</span><span class="exercise-num">${num} / ${total}</span></div>
+    <h4>${title}</h4>${desc?`<div class="exercise-desc">${desc}</div>`:''}
+    <div class="fill-area">${blanks.map((b,i)=>`<span class="syntax">${esc(b.before)}</span><input class="fill-input" data-fill="${id}" data-idx="${i}" style="width:${b.width||80}px"><span class="syntax">${esc(b.after)}</span>`).join('')}</div>
+    <button class="btn btn-dark" onclick="checkFill('${id}',${answersJson})">Проверить</button>
+    <div id="${id}-fb"></div></div>`;
+}
+
+function sandboxExercise(num, total, title, desc, initialCode, checkName, hint) {
+  const id = 'ex'+(exId++);
+  return `<div class="exercise" id="${id}"><div class="exercise-bar"></div>
+    <div class="exercise-header"><span class="exercise-type">${icons.check} Практика</span><span class="exercise-num">${num} / ${total}</span></div>
+    <h4>${title}</h4>${desc?`<div class="exercise-desc">${desc}</div>`:''}
+    <div class="sandbox-grid">
+      <div><div class="sandbox-label">Редактор</div><textarea class="sandbox-editor" id="${id}-code" spellcheck="false">${esc(initialCode)}</textarea></div>
+      <div><div class="sandbox-label">Превью</div><div class="sandbox-preview" id="${id}-preview"><div class="sandbox-placeholder">Ожидание компиляции...<br>Нажмите «Запустить код»</div></div></div>
+    </div>
+    <div class="btn-group">
+      <button class="btn btn-primary" onclick="runSandbox('${id}')">▶ Запустить код</button>
+      <button class="btn btn-dark" onclick="checkSandbox('${id}','${checkName}')">✓ Проверить</button>
+      ${hint?`<button class="btn btn-outline" onclick="toggleHint('${id}')">Подсказка</button>`:''}
+    </div>
+    ${hint?`<div id="${id}-hint" style="display:none" class="feedback" style="margin-top:14px;padding:14px;background:var(--panel);border:1px solid var(--border);color:var(--fg)">💡 ${hint}</div>`:''}
+    <div id="${id}-fb"></div></div>`;
+}
+
+// ── Exercise logic ──
+function checkChoice(id, idx, correct) {
+  const card = document.getElementById(id);
+  if (card.dataset.checked) return;
+  card.dataset.checked = '1';
+  const btns = card.querySelectorAll('.choice-option');
+  btns.forEach((b,i)=>{
+    b.disabled = true;
+    if (i===idx) b.classList.add(correct?'selected-correct':'selected-wrong');
+    else b.classList.add('dimmed');
+    const chk = b.querySelector('.choice-check');
+    if (i===idx) chk.innerHTML = correct ? icons.check : icons.x;
+  });
+  card.classList.add(correct?'correct':'wrong');
+  document.getElementById(id+'-fb').innerHTML = `<div class="feedback ${correct?'feedback-ok':'feedback-err'}">${correct?icons.check:icons.x}<span>${correct?'Верно!':'Неверно. Попробуй перечитать теорию выше.'}</span></div>`;
+}
+
+function checkMatch(id, answers) {
+  const card = document.getElementById(id);
+  if (card.dataset.checked) return;
+  const sels = card.querySelectorAll(`[data-match="${id}"]`);
+  let allFilled = true, allCorrect = true;
+  sels.forEach((s,i)=>{
+    if (!s.value) allFilled = false;
+    if (s.value !== answers[i]) allCorrect = false;
+  });
+  if (!allFilled) return;
+  card.dataset.checked = '1';
+  sels.forEach((s,i)=>{
+    s.disabled = true;
+    s.classList.add(s.value===answers[i]?'sel-correct':'sel-wrong');
+  });
+  card.classList.add(allCorrect?'correct':'wrong');
+  document.getElementById(id+'-fb').innerHTML = `<div class="feedback ${allCorrect?'feedback-ok':'feedback-err'}">${allCorrect?icons.check:icons.x}<span>${allCorrect?'Всё верно! Отличная работа.':'Есть ошибки. Проверь выделенные строки.'}</span></div>`;
+}
+
+function checkFill(id, answers) {
+  const card = document.getElementById(id);
+  if (card.dataset.checked) return;
+  card.dataset.checked = '1';
+  const inputs = card.querySelectorAll(`[data-fill="${id}"]`);
+  let allCorrect = true;
+  inputs.forEach((inp,i)=>{
+    inp.disabled = true;
+    const ok = inp.value.trim().toLowerCase()===answers[i].toLowerCase();
+    inp.classList.add(ok?'inp-correct':'inp-wrong');
+    if (!ok) allCorrect = false;
+  });
+  card.classList.add(allCorrect?'correct':'wrong');
+  document.getElementById(id+'-fb').innerHTML = `<div class="feedback ${allCorrect?'feedback-ok':'feedback-err'}">${allCorrect?icons.check:icons.x}<span>${allCorrect?'Верно!':`Правильный ответ: ${answers.join(', ')}`}</span></div>`;
+}
+
+function runSandbox(id) {
+  const code = document.getElementById(id+'-code').value;
+  const preview = document.getElementById(id+'-preview');
+  preview.innerHTML = `<iframe srcdoc="${esc(code)}" sandbox="allow-same-origin" title="preview" style="width:100%;min-height:180px;border:0"></iframe>`;
+}
+
+function checkSandbox(id, fnName) {
+  const code = document.getElementById(id+'-code').value;
+  const result = sandboxChecks[fnName](code);
+  const card = document.getElementById(id);
+  if (result.ok) card.classList.add('correct');
+  document.getElementById(id+'-fb').innerHTML = `<div class="feedback ${result.ok?'feedback-ok':'feedback-err'}">${result.ok?icons.check:icons.x}<span>${result.message}</span></div>`;
+}
+
+function toggleHint(id) {
+  const h = document.getElementById(id+'-hint');
+  h.style.display = h.style.display==='none'?'block':'none';
+}
+
+// ── Sandbox check functions ──
+const sandboxChecks = {
+  l1e5(code) {
+    const a = /bgcolor\s*=\s*["']black["']/i.test(code);
+    const b = /<\/body>/i.test(code);
+    if (a&&b) return {ok:true,message:'Обе ошибки найдены и исправлены!'};
+    const e=[];if(!a)e.push('замени color на bgcolor');if(!b)e.push('закрывающий тег должен быть </body>, а не <body>');
+    return {ok:false,message:`Ещё не всё: ${e.join('; ')}`};
+  },
+  l1e6(code) {
+    const c=[
+      {test:/bgcolor\s*=\s*["']#0b1a24["']/i.test(code),msg:'bgcolor="#0b1a24"'},
+      {test:/text\s*=\s*["']#F5FAFD["']/i.test(code),msg:'text="#F5FAFD"'},
+      {test:/topmargin\s*=\s*["']40["']/i.test(code),msg:'topmargin="40"'},
+      {test:/leftmargin\s*=\s*["']60["']/i.test(code),msg:'leftmargin="60"'},
+      {test:/<!--\s*Мой интерфейс\s*-->/.test(code),msg:'комментарий'},
+      {test:/Система активна/.test(code),msg:'текст «Система активна»'},
+    ];
+    const f=c.filter(x=>!x.test);
+    if(!f.length) return {ok:true,message:'Шаблон готов! Переходи к следующему уровню.'};
+    return {ok:false,message:`Не хватает: ${f.map(x=>x.msg).join(', ')}`};
+  },
+  l2e3(code) {
+    const a=/<h1[^>]*>\s*Досье\s*<\/h1>/i.test(code);
+    const b=/<p[^>]*>\s*Объект:\s*Неизвестен\.?\s*<\/p>/i.test(code);
+    if(a&&b) return {ok:true,message:'Готово! Текстовая структура на месте.'};
+    const m=[];if(!a)m.push('<h1>Досье</h1>');if(!b)m.push('<p>Объект: Неизвестен</p>');
+    return {ok:false,message:`Не хватает: ${m.join(', ')}`};
+  },
+  l3e3(code) {
+    const c=[
+      {test:/<header[^>]*>[\s\S]*Cyber HTML[\s\S]*<\/header>/i.test(code),msg:'<header>'},
+      {test:/<nav[^>]*>[\s\S]*<\/nav>/i.test(code),msg:'<nav>'},
+      {test:/<main[^>]*>[\s\S]*<\/main>/i.test(code),msg:'<main>'},
+      {test:/<footer[^>]*>[\s\S]*<\/footer>/i.test(code),msg:'<footer>'},
+    ];
+    const f=c.filter(x=>!x.test);
+    if(!f.length) return {ok:true,message:'Каркас собран! Теперь любой разберётся в структуре.'};
+    return {ok:false,message:`Не хватает: ${f.map(x=>x.msg).join(', ')}`};
+  },
+  l4e3(code) {
+    const c=[
+      {test:/<div[^>]*id\s*=\s*["']profile["'][^>]*>/i.test(code),msg:'div с id="profile"'},
+      {test:/<h2[^>]*>\s*Агент\s*<\/h2>/i.test(code),msg:'<h2>Агент</h2>'},
+      {test:/<span[^>]*class\s*=\s*["']status["'][^>]*>[\s\S]*активен[\s\S]*<\/span>/i.test(code),msg:'<span class="status">активен</span>'},
+    ];
+    const f=c.filter(x=>!x.test);
+    if(!f.length) return {ok:true,message:'Карточка собрана! div, span, class и id — все на месте.'};
+    return {ok:false,message:`Не хватает: ${f.map(x=>x.msg).join(', ')}`};
+  },
+  l5e4(code) {
+    const c=[
+      {test:/<a[^>]*href\s*=\s*["']https?:\/\/google\.com["'][^>]*>[\s\S]*Google[\s\S]*<\/a>/i.test(code),msg:'ссылка на Google'},
+      {test:/<img[^>]*src\s*=\s*["']logo\.png["'][^>]*/i.test(code),msg:'img с src="logo.png"'},
+      {test:/<img[^>]*alt\s*=\s*["']Логотип["'][^>]*/i.test(code),msg:'alt="Логотип"'},
+    ];
+    const f=c.filter(x=>!x.test);
+    if(!f.length) return {ok:true,message:'🎉 Все 5 уровней пройдены! Ты теперь читаешь HTML.'};
+    return {ok:false,message:`Не хватает: ${f.map(x=>x.msg).join(', ')}`};
+  },
+};
+
+// ── Level content ──
+function levelContent(idx) {
+  exId = idx * 100; // reset exercise IDs per level
+  switch(idx) {
+    case 0: return level1();
+    case 1: return level2();
+    case 2: return level3();
+    case 3: return level4();
+    case 4: return level5();
+  }
+}
+
+function level1() {
+  return `
+${theory('HTML — скелет любой веб-страницы',`
+<p>Открой любой сайт, нажми Ctrl+U — увидишь HTML-код. <strong>HTML</strong> (HyperText Markup Language) — это не язык программирования, а язык разметки. Он не считает и не принимает решений. Он просто говорит браузеру: «здесь заголовок, тут абзац, а вот тут кнопка».</p>
+<p>Без HTML не существует ни одного сайта. Даже самый красивый дизайн в итоге превращается в HTML-теги, которые браузер отрисовывает на экране.</p>
+<p><strong>Как это связано с ИИ?</strong> Когда ты просишь нейросеть «сделай лендинг» — она генерирует именно HTML. Если ты умеешь его читать, ты можешь проверить результат, найти ошибку и поправить руками вместо того, чтобы переписывать промпт пятый раз подряд.</p>
+`)}
+
+${choiceExercise('01','06','Для чего нужен HTML?','Выбери один верный ответ.',[
+  {text:'Программировать логику: циклы, условия, вычисления'},
+  {text:'Размечать структуру страницы: заголовки, текст, кнопки',correct:true},
+  {text:'Задавать цвета, шрифты и отступы элементам'},
+])}
+
+${theory('Теги — кирпичики HTML',`
+<p>Весь HTML состоит из <strong>тегов</strong> — команд в угловых скобках. Тег — это инструкция браузеру: «покажи этот текст жирным», «вставь тут картинку», «начни новый абзац».</p>
+<p><strong>Парные теги</strong> оборачивают содержимое. У них есть открывающая и закрывающая часть (со слешем):</p>
+${code('<b>этот текст станет жирным</b>')}
+<p><strong>Непарные теги</strong> — одиночки. Они не оборачивают ничего, а просто выполняют команду. Например, рисуют горизонтальную линию:</p>
+${code('<hr>')}
+<p>У тегов бывают <strong>атрибуты</strong> — дополнительные настройки. Записываются внутри открывающего тега:</p>
+${code('<body bgcolor="black">\n      ↑ тег    ↑ атрибут = значение')}
+`)}
+
+${matchExercise('02','06','Что есть что?','Определи тип каждого фрагмента кода.',[
+  {label:'<b> ... </b>',correctValue:'Парный тег',options:['Атрибут','Непарный тег','Парный тег']},
+  {label:'<hr>',correctValue:'Непарный тег',options:['Атрибут','Непарный тег','Парный тег']},
+  {label:'bgcolor="black"',correctValue:'Атрибут',options:['Атрибут','Непарный тег','Парный тег']},
+])}
+
+${theory('Каркас документа — он всегда одинаковый',`
+<p>Каждый HTML-файл начинается с одного и того же шаблона. Это как титульная страница у документа — без неё браузер не поймёт, что перед ним.</p>
+${code('<!DOCTYPE html>\n<html>\n<head>\n    <meta charset="UTF-8">\n    <title>Текст на вкладке браузера</title>\n</head>\n<body>\n    Здесь всё, что видит пользователь\n</body>\n</html>')}
+<p>Две главные зоны:</p>
+<ul>
+<li><strong>&lt;head&gt;</strong> — «закулисье». Тут подключаются шрифты, стили, указывается кодировка. Пользователь этого не видит.</li>
+<li><strong>&lt;body&gt;</strong> — «сцена». Всё, что появляется на экране: текст, картинки, кнопки — живёт здесь.</li>
+</ul>
+`)}
+
+${theory('meta charset — зачем указывать кодировку',`
+<p>Заметил строку ${ic('<meta charset="UTF-8">')} в &lt;head&gt;? Она говорит браузеру, в какой кодировке написан текст. <strong>UTF-8</strong> — универсальная кодировка, которая поддерживает все языки: русский, английский, эмодзи, китайские иероглифы.</p>
+<p>Без этой строки браузер может угадать кодировку неправильно — и вместо «Привет» покажет ${ic('ÐÑÐ¸Ð²ÐµÑ')}. Знакомые «кракозябры»? Вот именно из-за этого.</p>
+<p><strong>Правило:</strong> всегда пиши ${ic('<meta charset="UTF-8">')} первой строкой внутри &lt;head&gt;. Это стандарт.</p>
+`)}
+
+${fillExercise('03','06','Открой и закрой контейнер контента','Впиши название тега (без скобок), в котором находится всё видимое содержимое страницы.',[
+  {before:'<',after:'> Контент </',answer:'body',width:70},
+  {before:'',after:'>',answer:'body',width:70},
+])}
+
+${theory('Комментарии — заметки прямо в коде',`
+<p>Иногда в коде нужно оставить пометку для себя: «этот блок отвечает за шапку» или «потом доделать». Для этого есть <strong>комментарии</strong>. Браузер их полностью игнорирует — они видны только тому, кто читает код.</p>
+${code('\x3C!-- Это комментарий. Браузер его не покажет --\x3E')}
+<p>Открывающая часть — 4 символа: ${ic('\x3C')} угловая скобка + ${ic('!')} восклицательный знак + ${ic('--')} два дефиса. Закрывается двумя дефисами и угловой скобкой: ${ic('--\x3E')}. Между ними — любой текст.</p>
+`)}
+
+${fillExercise('04','06','Спрячь текст от браузера','Оберни фразу в HTML-комментарий.',[
+  {before:'',after:' Секретный код ',answer:'<!--',width:60},
+  {before:'',after:'',answer:'-->',width:50},
+])}
+
+${theory('Отступы от краёв экрана',`
+<p>По умолчанию текст прилипает к верхнему и левому краю окна. Это можно исправить атрибутами тега body:</p>
+<ul>
+<li><strong>topmargin</strong> — отступ сверху (в пикселях)</li>
+<li><strong>leftmargin</strong> — отступ слева</li>
+</ul>
+${code('<body topmargin="50" leftmargin="30">')}
+`)}
+
+${sandboxExercise('05','06','Найди две ошибки',
+  '<p>Этот код должен показать белый текст на чёрном фоне, но не работает. Тут ровно две ошибки — найди и исправь обе.</p>',
+  '<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <title>Тест</title>\n</head>\n<body color="black" text="white">\n  Система активна\n<body>\n</html>',
+  'l1e5',
+  'Подсказка 1: атрибут для фона называется bgcolor, а не color. Подсказка 2: посмотри внимательно на закрывающий тег body — там чего-то не хватает.'
+)}
+
+${sandboxExercise('06','06','Настрой шаблон страницы',
+  `<p>Перед тобой пустой HTML-шаблон. Допиши его:</p><ul><li>Фон: ${ic('bgcolor="#0b1a24"')}, цвет текста: ${ic('text="#F5FAFD"')}</li><li>Отступы: ${ic('topmargin="40"')} и ${ic('leftmargin="60"')}</li><li>Комментарий: ${ic('\x3C!-- Мой интерфейс --\x3E')}</li><li>Обычный текст: <strong>Система активна</strong></li></ul>`,
+  '<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <title>Моя страница</title>\n</head>\n<body>\n\n</body>\n</html>',
+  'l1e6'
+)}`;
+}
+
+function level2() {
+  return `
+${theory('Заголовки — иерархия важности',`
+<p>В газете есть крупный заголовок на первой полосе, заголовки поменьше у рубрик и совсем мелкие у заметок. В HTML работает та же логика — шесть уровней заголовков, от h1 до h6:</p>
+${code('<h1>Главный заголовок (один на страницу)</h1>\n<h2>Заголовок раздела</h2>\n<h3>Заголовок подраздела</h3>')}
+<p>Чем меньше цифра — тем крупнее и важнее заголовок. <strong>h1 на странице должен быть только один</strong> — это как название книги. h2 — главы, h3 — параграфы внутри глав.</p>
+`)}
+
+${theory('Абзацы, переносы и списки',`
+<p><strong>Абзац</strong> — тег ${ic('<p>')}. Каждый блок текста оборачивается в свой тег p. Браузер автоматически добавляет отступ между абзацами.</p>
+${code('<p>Первый абзац.</p>\n<p>Второй абзац — с отступом сверху.</p>')}
+<p><strong>Перенос строки</strong> — тег ${ic('<br>')}. Непарный. Переносит текст на новую строку без нового абзаца:</p>
+${code('<p>Первая строка<br>Вторая строка (без отступа)</p>')}
+<p><strong>Списки</strong> бывают двух видов:</p>
+${code('<ul>           ← маркированный (точки)\n  <li>Яблоки</li>\n  <li>Молоко</li>\n</ul>\n\n<ol>           ← нумерованный (1, 2, 3...)\n  <li>Проснуться</li>\n  <li>Позавтракать</li>\n</ol>')}
+<p>${ic('<li>')} — это пункт списка (list item). Он всегда живёт внутри ul или ol.</p>
+`)}
+
+${matchExercise('01','03','Разбери теги','Сопоставь каждый тег с его функцией.',[
+  {label:'<h1>',correctValue:'Крупный заголовок',options:['Блок текста','Новая строка','Крупный заголовок']},
+  {label:'<p>',correctValue:'Блок текста',options:['Блок текста','Новая строка','Крупный заголовок']},
+  {label:'<br>',correctValue:'Новая строка',options:['Блок текста','Новая строка','Крупный заголовок']},
+])}
+
+${choiceExercise('02','03','Сколько тегов h1 должно быть на странице?','',[
+  {text:'Сколько угодно — это просто большой шрифт'},
+  {text:'Ровно один — это главный заголовок страницы',correct:true},
+  {text:'Ни одного — h1 устарел'},
+])}
+
+${sandboxExercise('03','03','Собери текстовую страницу',
+  `<p>Допиши в body:</p><ul><li>Заголовок ${ic('<h1>')} с текстом «Досье»</li><li>Абзац ${ic('<p>')} с текстом «Объект: Неизвестен»</li></ul>`,
+  '<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <title>Текст</title>\n</head>\n<body bgcolor="#0b1a24" text="#F5FAFD">\n\n</body>\n</html>',
+  'l2e3'
+)}`;
+}
+
+function level3() {
+  return `
+${theory('Теги со смыслом',`
+<p>Можно собрать сайт целиком из тегов ${ic('<div>')} — и он будет работать. Но читать такой код — как разбирать чужой шкаф, где всё свалено в одну кучу.</p>
+<p><strong>Семантические теги</strong> решают эту проблему. Их названия сразу объясняют, что внутри. Это не меняет внешний вид, но делает код понятным для людей, поисковиков и скринридеров.</p>
+${code('<header>  — шапка (логотип, название сайта)\n<nav>     — меню со ссылками\n<main>    — основной контент (один на страницу)\n<section> — тематический блок\n<article> — самостоятельный материал (пост, карточка)\n<footer>  — подвал (копирайт, контакты)')}
+<p><strong>Практическая польза:</strong> Google и Яндекс лучше индексируют сайты с семантической разметкой. А когда ты открываешь чужой код — сразу видишь структуру, не вчитываясь в содержимое.</p>
+`)}
+
+${choiceExercise('01','03','В какой тег оборачивается меню со ссылками?','Выбери правильный семантический тег.',[
+  {text:'<div> — универсальный блок без смысла'},
+  {text:'<section> — тематический раздел страницы'},
+  {text:'<nav> — контейнер для ссылок-меню',correct:true},
+  {text:'<aside> — боковая панель'},
+])}
+
+${matchExercise('02','03','Подбери тег к блоку','У сайта три зоны. Какой семантический тег подходит каждой?',[
+  {label:'Логотип + название',correctValue:'header',options:['header','main','footer','nav']},
+  {label:'Статья с текстом',correctValue:'main',options:['header','main','footer','nav']},
+  {label:'© 2025, контакты',correctValue:'footer',options:['header','main','footer','nav']},
+])}
+
+${sandboxExercise('03','03','Собери семантический каркас',
+  `<p>Добавь в body четыре семантических блока:</p><ul><li>${ic('<header>')} — текст «Cyber HTML»</li><li>${ic('<nav>')} — текст «Меню»</li><li>${ic('<main>')} — текст «Контент»</li><li>${ic('<footer>')} — текст «Подвал»</li></ul>`,
+  '<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <title>Семантика</title>\n</head>\n<body bgcolor="#0b1a24" text="#F5FAFD">\n\n</body>\n</html>',
+  'l3e3'
+)}`;
+}
+
+function level4() {
+  return `
+${theory('div — невидимая коробка',`
+<p>Иногда нужно взять несколько элементов и засунуть их в одну коробку. Не чтобы добавить смысл, а просто чтобы сгруппировать. Для этого есть <strong>&lt;div&gt;</strong>.</p>
+<p>div — это прозрачная коробка. Сама по себе она ничего не показывает, но всё, что внутри, становится одной группой.</p>
+<p><strong>Главное свойство:</strong> div всегда начинается с новой строки и занимает всю ширину. Вот два div подряд:</p>
+${code('<div>Коробка 1</div>\n<div>Коробка 2</div>')}
+<p>На экране они встают друг под другом, каждый на всю ширину:</p>
+<div class="demo-block" style="display:flex;flex-direction:column;gap:8px">
+  <div style="border:2px dashed hsl(var(--pink));border-radius:8px;padding:10px 16px;position:relative">
+    <span style="position:absolute;top:-9px;left:12px;background:var(--code-bg);padding:0 6px;font-size:10px;color:var(--secondary)">div</span>
+    Коробка 1
+  </div>
+  <div style="border:2px dashed hsl(var(--blue));border-radius:8px;padding:10px 16px;position:relative">
+    <span style="position:absolute;top:-9px;left:12px;background:var(--code-bg);padding:0 6px;font-size:10px;color:var(--primary)">div</span>
+    Коробка 2
+  </div>
+</div>
+<p>Зачем это нужно? Чтобы группировать. Например, карточка товара — это div, внутри которого заголовок, цена и кнопка:</p>
+${code('<div>\n  <h2>Наушники</h2>\n  <p>25 000 ₽</p>\n  <button>Купить</button>\n</div>')}
+`)}
+
+${theory('span — пометка внутри текста',`
+<p>А теперь представь: у тебя предложение, и ты хочешь покрасить одно слово в красный. Оборачивать весь абзац в div? Нет — он перенесёт всё на новую строку. Тут нужен <strong>&lt;span&gt;</strong>.</p>
+<p><strong>span</strong> — невидимая пометка прямо внутри текста. Он ничего не ломает, не переносит — просто тихо оборачивает фрагмент.</p>
+${code('<p>Статус: <span style="color:red">ошибка</span> подключения</p>')}
+<p>На экране всё в одной строке, но слово «ошибка» красное:</p>
+<div class="demo-block">Статус: <span style="color:var(--secondary);font-weight:700;border-bottom:2px dashed var(--secondary)">ошибка</span> подключения</div>
+<p><strong>Сравни div и span наглядно:</strong></p>
+<div class="demo-block" style="display:flex;flex-direction:column;gap:16px">
+  <div>
+    <div style="font-size:10px;text-transform:uppercase;color:var(--muted-fg);margin-bottom:6px">div — каждый на новой строке:</div>
+    <div style="display:flex;flex-direction:column;gap:6px">
+      <div style="border:2px dashed hsl(var(--pink));border-radius:4px;padding:6px 12px">Слово</div>
+      <div style="border:2px dashed hsl(var(--pink));border-radius:4px;padding:6px 12px">Другое слово</div>
+    </div>
+  </div>
+  <div>
+    <div style="font-size:10px;text-transform:uppercase;color:var(--muted-fg);margin-bottom:6px">span — всё в одной строке:</div>
+    <div>Это <span style="border:2px dashed hsl(var(--blue));border-radius:4px;padding:2px 6px">первое</span> и <span style="border:2px dashed hsl(var(--blue));border-radius:4px;padding:2px 6px">второе</span> слово</div>
+  </div>
+</div>
+`)}
+
+${choiceExercise('01','03','Зачем h2 и p обёрнуты в div?','Код: &lt;div&gt;&lt;h2&gt;Ольга&lt;/h2&gt;&lt;p&gt;Дизайнер&lt;/p&gt;&lt;/div&gt;',[
+  {text:'Чтобы нарисовать рамку вокруг блока'},
+  {text:'Чтобы объединить элементы в одну группу',correct:true},
+  {text:'Чтобы текст стал жирным'},
+])}
+
+${choiceExercise('02','03','Какой тег выбрать, чтобы покрасить одно слово?','Нужно выделить цветом слово «важно» в предложении: «Это важно знать».',[
+  {text:'<div>'},
+  {text:'<span>',correct:true},
+  {text:'<p>'},
+])}
+
+${theory('class и id — имена для элементов',`
+<p>Окей, у нас есть div и span. Но как потом сказать CSS или JavaScript: «найди именно этот div»? Для этого элементам дают имена — через атрибуты <strong>class</strong> и <strong>id</strong>.</p>
+<p><strong>class</strong> — групповая метка. Её можно повесить на сколько угодно элементов. Все кнопки с одним class будут выглядеть одинаково:</p>
+${code('\x3Cbutton class="btn"\x3EСохранить\x3C/button\x3E\n\x3Cbutton class="btn"\x3EУдалить\x3C/button\x3E\n\x3C!-- Оба получат одинаковый стиль --\x3E')}
+<p><strong>id</strong> — персональное имя. На всю страницу только один элемент может иметь конкретный id:</p>
+${code('\x3Cdiv id="modal"\x3EОкно входа\x3C/div\x3E\n\x3C!-- Только один элемент с этим id --\x3E')}
+<p><strong>Просто запомни:</strong> class — для группы одинаковых, id — для одного конкретного.</p>
+`)}
+
+${sandboxExercise('03','03','Собери карточку профиля',
+  '<p>Создай карточку:</p><ul><li>'+ic('<div id="profile">')+' — коробка-обёртка</li><li>Внутри — '+ic('<h2>')+' с текстом «Агент»</li><li>Внутри — '+ic('<p>')+' с текстом: Статус: '+ic('<span class="status">')+'активен'+ic('</span>')+'</li></ul>',
+  '<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <title>Профиль</title>\n</head>\n<body bgcolor="#0b1a24" text="#F5FAFD">\n\n</body>\n</html>',
+  'l4e3'
+)}`;
+}
+
+function level5() {
+  return `
+${theory('Ссылки — тег &lt;a&gt;',`
+<p>Ссылка делает текст кликабельным. Нажал — перешёл на другую страницу. Тег <strong>&lt;a&gt;</strong> (от anchor — якорь):</p>
+${code('<a href="https://example.com">Текст ссылки</a>')}
+<p>Два главных атрибута:</p>
+<ul>
+<li><strong>href</strong> — куда ведёт ссылка (адрес). Без него тег a бесполезен.</li>
+<li><strong>target="_blank"</strong> — открыть в новой вкладке. Без этого ссылка откроется в текущей.</li>
+</ul>
+${code('<a href="https://google.com" target="_blank">\n  Google (откроется в новой вкладке)\n</a>')}
+`)}
+
+${theory('Картинки — тег &lt;img&gt;',`
+<p><strong>&lt;img&gt;</strong> вставляет изображение. Это непарный тег — закрывающая часть не нужна.</p>
+${code('<img src="photo.jpg" alt="Описание фото">')}
+<p>Атрибуты:</p>
+<ul>
+<li><strong>src</strong> — путь к файлу или URL картинки. Без него ничего не покажется.</li>
+<li><strong>alt</strong> — текстовое описание. Видно, если картинка не загрузилась, и используется поисковиками.</li>
+<li><strong>width</strong>, <strong>height</strong> — размеры в пикселях.</li>
+</ul>
+`)}
+
+${choiceExercise('01','04','Какой атрибут задаёт адрес ссылки?','',[
+  {text:'src'},{text:'href',correct:true},{text:'link'},{text:'url'},
+])}
+
+${matchExercise('02','04','Какой атрибут к какому тегу?','Распредели атрибуты по тегам.',[
+  {label:'href',correctValue:'<a> (ссылка)',options:['<a> (ссылка)','<img> (картинка)']},
+  {label:'src',correctValue:'<img> (картинка)',options:['<a> (ссылка)','<img> (картинка)']},
+  {label:'alt',correctValue:'<img> (картинка)',options:['<a> (ссылка)','<img> (картинка)']},
+  {label:'target',correctValue:'<a> (ссылка)',options:['<a> (ссылка)','<img> (картинка)']},
+])}
+
+${fillExercise('03','04','Допиши тег картинки','Впиши атрибут, который указывает путь к файлу изображения.',[
+  {before:'<img ',after:'="photo.jpg" alt="Фото">',answer:'src',width:60},
+])}
+
+${sandboxExercise('04','04','Добавь ссылку и картинку',
+  `<p>Допиши в body:</p><ul><li>Ссылку: ${ic('<a href="https://google.com">Google</a>')}</li><li>Картинку: ${ic('<img src="logo.png" alt="Логотип">')}</li></ul>`,
+  '<!DOCTYPE html>\n<html>\n<head>\n  <meta charset="UTF-8">\n  <title>Ссылки</title>\n</head>\n<body bgcolor="#0b1a24" text="#F5FAFD">\n\n</body>\n</html>',
+  'l5e4'
+)}`;
+}
+
+// ── Anatomy data ──
+const ANATOMY_ZONES = {
+  doctype: {tag:'\x3C!DOCTYPE html\x3E',label:'Тип документа',color:'var(--muted-fg)',desc:'Первая строка файла. Говорит браузеру: «это HTML5». Без неё страница может отобразиться криво.',example:'\x3C!DOCTYPE html\x3E'},
+  html: {tag:'\x3Chtml\x3E',label:'Корень',color:'var(--muted-fg)',desc:'Контейнер для всего. Внутри него — \x3Chead\x3E и \x3Cbody\x3E. Больше ничего снаружи быть не должно.',example:'\x3Chtml\x3E\n  \x3Chead\x3E...\x3C/head\x3E\n  \x3Cbody\x3E...\x3C/body\x3E\n\x3C/html\x3E'},
+  head: {tag:'\x3Chead\x3E',label:'Закулисье',color:'hsl(48,96%,53%)',desc:'Метаданные: кодировка, заголовок вкладки, стили, шрифты. Пользователь этого НЕ видит на странице.',example:'\x3Chead\x3E\n  \x3Cmeta charset="UTF-8"\x3E\n  \x3Ctitle\x3EМой сайт\x3C/title\x3E\n\x3C/head\x3E'},
+  header: {tag:'\x3Cheader\x3E',label:'Шапка сайта',color:'#3b82f6',desc:'Верхняя часть страницы. Тут обычно логотип и название сайта.',example:'\x3Cheader\x3E\n  \x3Ch1\x3EМой сайт\x3C/h1\x3E\n\x3C/header\x3E'},
+  nav: {tag:'\x3Cnav\x3E',label:'Навигация',color:'#60a5fa',desc:'Блок ссылок для перемещения по сайту. Меню, разделы, страницы — всё здесь.',example:'\x3Cnav\x3E\n  \x3Ca href="/"\x3EГлавная\x3C/a\x3E\n  \x3Ca href="/about"\x3EО нас\x3C/a\x3E\n\x3C/nav\x3E'},
+  main: {tag:'\x3Cmain\x3E',label:'Основной контент',color:'#a855f7',desc:'Главное содержимое страницы — статьи, заголовки, картинки, формы.',example:'\x3Cmain\x3E\n  \x3Ch2\x3EСтатья\x3C/h2\x3E\n  \x3Cp\x3EТекст...\x3C/p\x3E\n\x3C/main\x3E'},
+  footer: {tag:'\x3Cfooter\x3E',label:'Подвал',color:'#64748b',desc:'Нижняя часть страницы. Копирайт, контакты, дополнительные ссылки.',example:'\x3Cfooter\x3E\n  © 2025 Мой сайт\n\x3C/footer\x3E'},
+  h1: {tag:'\x3Ch1\x3E',label:'Заголовок',color:'#a855f7',desc:'Главный заголовок страницы. Обычно один на всю страницу.',example:'\x3Ch1\x3EМой сайт\x3C/h1\x3E'},
+  p: {tag:'\x3Cp\x3E',label:'Абзац',color:'#a855f7',desc:'Параграф текста. Каждый \x3Cp\x3E начинается с новой строки.',example:'\x3Cp\x3EЭто абзац текста.\x3C/p\x3E'},
+  img: {tag:'\x3Cimg\x3E',label:'Изображение',color:'#64748b',desc:'Вставляет картинку. Непарный тег. Атрибут src — путь к файлу, alt — описание.',example:'\x3Cimg src="photo.jpg" alt="Описание"\x3E'},
+  a: {tag:'\x3Ca\x3E',label:'Ссылка',color:'#3b82f6',desc:'Делает текст кликабельным. Атрибут href задаёт адрес.',example:'\x3Ca href="https://example.com"\x3EТекст ссылки\x3C/a\x3E'},
+};
+
+let anatomyActive = null;
+let anatomyShowCode = false;
+
+function toggleAnatomy(id) {
+  anatomyActive = anatomyActive === id ? null : id;
+  renderAnatomyUpdate();
+}
+
+function buildInfoCard() {
+  if (!anatomyActive) return '<div class="info-hint">\u2191 Кликни на любую часть страницы выше</div>';
+  const z = ANATOMY_ZONES[anatomyActive];
+  if (!z) return '';
+  return `<div class="info-card" style="--card-accent:${z.color}">
+    <div class="info-card-header">
+      <div><span class="info-card-tag" style="color:${z.color}">${esc(z.tag)}</span><span class="info-card-label">\u2014 ${z.label}</span></div>
+      <button class="info-card-close" onclick="toggleAnatomy('${anatomyActive}')">\u2715</button>
+    </div>
+    <p class="info-card-desc">${z.desc}</p>
+    <pre class="info-card-code">${esc(z.example)}</pre>
+  </div>`;
+}
+
+function renderAnatomyUpdate() {
+  const a = anatomyActive;
+  const infoEl = document.getElementById('anatomy-info');
+  if (infoEl) infoEl.innerHTML = buildInfoCard();
+  document.querySelectorAll('.page-zone').forEach(el => el.classList.toggle('active', el.dataset.zone === a));
+  document.querySelectorAll('.hidden-tag').forEach(el => el.classList.toggle('active', el.dataset.zone === a));
+  document.querySelectorAll('.inner-tag').forEach(el => el.classList.toggle('active', el.dataset.zone === a));
+  const imgEl = document.querySelector('.zone-img-placeholder');
+  if (imgEl) imgEl.classList.toggle('active', a === 'img');
+}
+
+function toggleAnatomyCode() {
+  anatomyShowCode = !anatomyShowCode;
+  const el = document.getElementById('anatomy-full-code');
+  const btn = document.getElementById('anatomy-code-btn');
+  if (anatomyShowCode) { el.style.display = 'block'; btn.textContent = '\u229F \u0421\u043A\u0440\u044B\u0442\u044C \u043A\u043E\u0434'; }
+  else { el.style.display = 'none'; btn.textContent = '\u229E \u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u043F\u043E\u043B\u043D\u044B\u0439 HTML-\u043A\u043E\u0434'; }
+}
+
+const FULL_HTML_CODE = '\x3C!DOCTYPE html\x3E\n\x3Chtml\x3E\n\x3Chead\x3E\n    \x3Cmeta charset="UTF-8"\x3E\n    \x3Ctitle\x3E\u041C\u043E\u0439 \u0441\u0430\u0439\u0442\x3C/title\x3E\n\x3C/head\x3E\n\x3Cbody\x3E\n\n    \x3Cheader\x3E\n        \x3Ch1\x3E\u041C\u043E\u0439 \u0441\u0430\u0439\u0442\x3C/h1\x3E\n    \x3C/header\x3E\n\n    \x3Cnav\x3E\n        \x3Ca href="/"\x3E\u0413\u043B\u0430\u0432\u043D\u0430\u044F\x3C/a\x3E\n        \x3Ca href="/about"\x3E\u041E \u043D\u0430\u0441\x3C/a\x3E\n    \x3C/nav\x3E\n\n    \x3Cmain\x3E\n        \x3Ch2\x3E\u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A \u0441\u0442\u0430\u0442\u044C\u0438\x3C/h2\x3E\n        \x3Cp\x3E\u0410\u0431\u0437\u0430\u0446 \u0442\u0435\u043A\u0441\u0442\u0430...\x3C/p\x3E\n        \x3Cimg src="photo.jpg" alt="\u0424\u043E\u0442\u043E"\x3E\n        \x3Ca href="/page"\x3E\u0421\u0441\u044B\u043B\u043A\u0430\x3C/a\x3E\n    \x3C/main\x3E\n\n    \x3Cfooter\x3E\n        \u00A9 2025 \u041C\u043E\u0439 \u0441\u0430\u0439\u0442\n    \x3C/footer\x3E\n\n\x3C/body\x3E\n\x3C/html\x3E';
+
+// ── Render ──
+function render() {
+  if (currentLevel === null && !window._showAnatomy) {
+    app().innerHTML = `
+      <div class="header-divider">
+        <span class="tag tag-blue">\u041E\u0431\u0443\u0447\u0430\u044E\u0449\u0430\u044F \u0441\u0438\u0441\u0442\u0435\u043C\u0430</span>
+        <h1>\u041E\u0441\u043D\u043E\u0432\u044B HTML</h1>
+        <p style="font-size:17px;color:var(--muted-fg)">\u041D\u0430\u0443\u0447\u0438\u0441\u044C \u0447\u0438\u0442\u0430\u0442\u044C \u0438 \u0440\u0435\u0434\u0430\u043A\u0442\u0438\u0440\u043E\u0432\u0430\u0442\u044C HTML \u2014 \u044F\u0437\u044B\u043A, \u043D\u0430 \u043A\u043E\u0442\u043E\u0440\u043E\u043C \u043F\u043E\u0441\u0442\u0440\u043E\u0435\u043D\u044B \u0432\u0441\u0435 \u0441\u0430\u0439\u0442\u044B. \u041F\u044F\u0442\u044C \u0443\u0440\u043E\u0432\u043D\u0435\u0439: \u043E\u0442 \u043F\u0435\u0440\u0432\u043E\u0433\u043E \u0442\u0435\u0433\u0430 \u0434\u043E \u0441\u0441\u044B\u043B\u043E\u043A \u0438 \u043A\u0430\u0440\u0442\u0438\u043D\u043E\u043A.</p>
+      </div>
+      <button class="anatomy-btn" onclick="openAnatomy()">
+        <span class="anatomy-btn-icon">\uD83D\uDCD0</span>
+        <span class="anatomy-btn-info"><span class="anatomy-btn-title">\u0410\u043D\u0430\u0442\u043E\u043C\u0438\u044F \u0432\u0435\u0431-\u0441\u0442\u0440\u0430\u043D\u0438\u0446\u044B</span><span class="anatomy-btn-desc">\u0418\u043D\u0442\u0435\u0440\u0430\u043A\u0442\u0438\u0432\u043D\u0430\u044F \u043F\u0430\u043C\u044F\u0442\u043A\u0430 \u2014 \u0438\u0437 \u0447\u0435\u0433\u043E \u0441\u043E\u0441\u0442\u043E\u0438\u0442 \u043B\u044E\u0431\u043E\u0439 \u0441\u0430\u0439\u0442</span></span>
+        <span class="anatomy-btn-arrow">\u041E\u0442\u043A\u0440\u044B\u0442\u044C \u2192</span>
+      </button>
+      <div class="map-header">\u041A\u0430\u0440\u0442\u0430 \u0443\u0440\u043E\u0432\u043D\u0435\u0439</div>
+      <div class="space-y" style="--space:10px" id="level-list">
+        ${LEVELS.map((l,i)=>{
+          const status = completed.includes(i)?'completed':'active';
+          return `<button class="level-btn status-${status}" onclick="openLevel(${i})">
+            <span class="accent-bar"></span>
+            <span class="level-num">${l.num}</span>
+            <span class="level-info"><span class="level-title">${l.title}</span><span class="level-desc">${l.desc}</span></span>
+            <span class="level-badge badge-${status}">${status==='completed'?icons.check+' \u0413\u043E\u0442\u043E\u0432\u043E':icons.arrowR+' \u0412 \u043F\u0440\u043E\u0446\u0435\u0441\u0441\u0435'}</span>
+          </button>`;
+        }).join('')}
+      </div>
+      ${completed.length?'<button class="reset-btn" onclick="resetProgress()">\u2715 \u0421\u0431\u0440\u043E\u0441\u0438\u0442\u044C \u043F\u0440\u043E\u0433\u0440\u0435\u0441\u0441</button>':''}
+    `;
+  } else if (window._showAnatomy) {
+    anatomyActive = null;
+    anatomyShowCode = false;
+    app().innerHTML = `
+      <div class="animate-in">
+        <button class="back-btn" onclick="closeAnatomy()">${icons.arrow} \u041D\u0430 \u043A\u0430\u0440\u0442\u0443 \u0443\u0440\u043E\u0432\u043D\u0435\u0439</button>
+        <div class="header-divider">
+          <span class="tag tag-blue">\uD83D\uDCD0 \u041F\u0430\u043C\u044F\u0442\u043A\u0430</span>
+          <h1 style="font-size:clamp(26px,5vw,36px)">\u0410\u043D\u0430\u0442\u043E\u043C\u0438\u044F \u0432\u0435\u0431-\u0441\u0442\u0440\u0430\u043D\u0438\u0446\u044B</h1>
+          <p class="anatomy-header">\u041A\u043B\u0438\u043A\u0430\u0439 \u043D\u0430 \u0447\u0430\u0441\u0442\u0438 \u0441\u0442\u0440\u0430\u043D\u0438\u0446\u044B \u2014 \u0443\u0437\u043D\u0430\u0435\u0448\u044C, \u043A\u0430\u043A\u043E\u0439 \u0442\u0435\u0433 \u0437\u0430 \u0447\u0442\u043E \u043E\u0442\u0432\u0435\u0447\u0430\u0435\u0442.</p>
+        </div>
+
+        <div class="hidden-layers">
+          <div class="hidden-layers-title">\u229E \u041D\u0435\u0432\u0438\u0434\u0438\u043C\u044B\u0435 \u0441\u043B\u043E\u0438</div>
+          <div style="display:flex;gap:8px;flex-wrap:wrap">
+            <button class="hidden-tag" data-zone="doctype" onclick="toggleAnatomy('doctype')">${esc('\x3C!DOCTYPE html\x3E')}</button>
+            <button class="hidden-tag" data-zone="html" onclick="toggleAnatomy('html')">${esc('\x3Chtml\x3E')}</button>
+            <button class="hidden-tag" data-zone="head" onclick="toggleAnatomy('head')">${esc('\x3Chead\x3E')}</button>
+          </div>
+        </div>
+
+        <div class="page-mock">
+          <div class="page-mock-bar">
+            <div class="page-mock-dots"><div class="page-mock-dot"></div><div class="page-mock-dot"></div><div class="page-mock-dot"></div></div>
+            <div class="page-mock-url">mysite.com</div>
+          </div>
+          <div>
+            <div class="page-zone zone-header" data-zone="header" onclick="toggleAnatomy('header')">
+              <span class="page-zone-label">${esc('\x3Cheader\x3E')}</span>
+              <div class="zone-h1">\u041C\u043E\u0439 \u0441\u0430\u0439\u0442 <span class="inner-tag" data-zone="h1" onclick="event.stopPropagation();toggleAnatomy('h1')">${esc('\x3Ch1\x3E')}</span></div>
+            </div>
+            <div class="page-zone zone-nav" data-zone="nav" onclick="toggleAnatomy('nav')">
+              <span class="page-zone-label">${esc('\x3Cnav\x3E')}</span>
+              <div class="zone-nav-links"><span>\u0413\u043B\u0430\u0432\u043D\u0430\u044F</span><span>\u041E \u043D\u0430\u0441</span><span>\u041A\u043E\u043D\u0442\u0430\u043A\u0442\u044B</span></div>
+            </div>
+            <div class="page-zone zone-main" data-zone="main" onclick="toggleAnatomy('main')">
+              <span class="page-zone-label">${esc('\x3Cmain\x3E')}</span>
+              <div style="font-size:15px;font-weight:600;color:#1e293b">\u0417\u0430\u0433\u043E\u043B\u043E\u0432\u043E\u043A \u0441\u0442\u0430\u0442\u044C\u0438 <span class="inner-tag" data-zone="h1" onclick="event.stopPropagation();toggleAnatomy('h1')">${esc('\x3Ch2\x3E')}</span></div>
+              <div class="zone-p">\u0410\u0431\u0437\u0430\u0446 \u0442\u0435\u043A\u0441\u0442\u0430, \u043A\u043E\u0442\u043E\u0440\u044B\u0439 \u043E\u043F\u0438\u0441\u044B\u0432\u0430\u0435\u0442 \u0441\u043E\u0434\u0435\u0440\u0436\u0438\u043C\u043E\u0435. <span class="inner-tag" data-zone="p" onclick="event.stopPropagation();toggleAnatomy('p')">${esc('\x3Cp\x3E')}</span></div>
+              <div class="zone-img-placeholder" onclick="event.stopPropagation();toggleAnatomy('img')">\uD83D\uDDBC \u0418\u0437\u043E\u0431\u0440\u0430\u0436\u0435\u043D\u0438\u0435 <span style="font-size:9px;color:#64748b;margin-left:4px;font-weight:700">${esc('\x3Cimg\x3E')}</span></div>
+              <div class="zone-p" style="margin-top:8px"><span style="color:#3b82f6;text-decoration:underline;cursor:pointer" onclick="event.stopPropagation();toggleAnatomy('a')">\u0421\u0441\u044B\u043B\u043A\u0430 \u043D\u0430 \u0434\u0440\u0443\u0433\u0443\u044E \u0441\u0442\u0440\u0430\u043D\u0438\u0446\u0443</span> <span class="inner-tag" data-zone="a" onclick="event.stopPropagation();toggleAnatomy('a')">${esc('\x3Ca\x3E')}</span></div>
+            </div>
+            <div class="page-zone zone-footer" data-zone="footer" onclick="toggleAnatomy('footer')">
+              <span class="page-zone-label">${esc('\x3Cfooter\x3E')}</span>
+              <div class="zone-footer-text">\u00A9 2025 \u041C\u043E\u0439 \u0441\u0430\u0439\u0442</div>
+            </div>
+          </div>
+        </div>
+
+        <div id="anatomy-info">${buildInfoCard()}</div>
+
+        <button class="show-code-btn" id="anatomy-code-btn" onclick="toggleAnatomyCode()">\u229E \u041F\u043E\u043A\u0430\u0437\u0430\u0442\u044C \u043F\u043E\u043B\u043D\u044B\u0439 HTML-\u043A\u043E\u0434</button>
+        <pre class="codeblock" id="anatomy-full-code" style="display:none;margin-top:12px">${esc(FULL_HTML_CODE)}</pre>
+      </div>
+    `;
+  } else {
+    const titles = LEVELS.map(l=>l.title);
+    const nums = LEVELS.map(l=>l.num);
+    app().innerHTML = `
+      <div class="animate-in">
+        <button class="back-btn" onclick="goToMap()">${icons.arrow} \u041D\u0430 \u043A\u0430\u0440\u0442\u0443</button>
+        <div><span class="tag tag-pink">\u0423\u0440\u043E\u0432\u0435\u043D\u044C ${nums[currentLevel]}</span><h2 style="margin-top:12px">${titles[currentLevel]}</h2></div>
+        <div class="space-y" style="margin-top:28px">
+          ${levelContent(currentLevel)}
+          <button class="btn btn-primary btn-full" onclick="completeLevel(${currentLevel})">\u2713 ${currentLevel===4?'\u0417\u0430\u0432\u0435\u0440\u0448\u0438\u0442\u044C \u043A\u0443\u0440\u0441':'\u0417\u0430\u0432\u0435\u0440\u0448\u0438\u0442\u044C \u0443\u0440\u043E\u0432\u0435\u043D\u044C'} \u2192 \u041D\u0430 \u043A\u0430\u0440\u0442\u0443</button>
+        </div>
+      </div>
+    `;
+  }
+}
+
+function openAnatomy() { window._showAnatomy = true; render(); window.scrollTo(0,0); }
+function closeAnatomy() { window._showAnatomy = false; render(); window.scrollTo(0,0); }
+function openLevel(i) { currentLevel = i; window._showAnatomy = false; render(); window.scrollTo(0,0); }
+function goToMap() { currentLevel = null; window._showAnatomy = false; render(); window.scrollTo(0,0); }
+function completeLevel(i) {
+  if (!completed.includes(i)) completed.push(i);
+  save();
+  currentLevel = null;
+  window._showAnatomy = false;
+  render();
+  window.scrollTo(0,0);
+}
+function resetProgress() { completed = []; save(); render(); }
+
+// ── Init ──
+render();
+</script>
+</body>
+</html>
